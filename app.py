@@ -320,10 +320,18 @@ and focus on measurable growth.
         with st.spinner("🤖 Creating your 7-day growth plan..."):
 
             try:
+   try:
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
         contents=prompt
     )
+
+    st.subheader("📈 AI Growth Strategy")
+    st.write(response.text)
+
+except Exception as e:
+    st.error("Gemini API error")
+    st.write(str(e))
 
     except Exception as e:
     st.error("Gemini API request failed.")
