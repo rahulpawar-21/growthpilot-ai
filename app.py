@@ -7,6 +7,10 @@ from agents.growth_agent import run_growth_agent
 
 load_dotenv()
 
+# ==============================
+# PAGE CONFIG
+# ==============================
+
 st.set_page_config(
     page_title="GrowthPilot AI",
     page_icon="🚀",
@@ -15,6 +19,7 @@ st.set_page_config(
 
 st.title("🚀 GrowthPilot AI")
 st.write("AI-powered business growth assistant")
+
 # ==============================
 # DASHBOARD
 # ==============================
@@ -76,7 +81,6 @@ if api_key:
 else:
     client = None
 
-
 # ==============================
 # AI GROWTH STRATEGY
 # ==============================
@@ -87,7 +91,7 @@ if st.button("🚀 Generate Growth Strategy"):
         st.warning("Please enter your business name.")
 
     elif not api_key:
-        st.error("Gemini API key not found. Check your .env file.")
+        st.error("Gemini API key not found. Check your Streamlit Secrets.")
 
     else:
 
@@ -111,17 +115,20 @@ Keep the answer clear and actionable.
 
         with st.spinner("🤖 AI is analyzing..."):
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
-            )
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash-lite",
+                    contents=prompt
+                )
 
-        st.subheader("📈 AI Growth Strategy")
-        st.write(response.text)
+                st.subheader("📈 AI Growth Strategy")
+                st.write(response.text)
 
+            except Exception as e:
+                st.error("Gemini API error")
+                st.write(str(e))
 
 st.divider()
-
 
 # ==============================
 # AUTONOMOUS GROWTH AGENT
@@ -138,25 +145,28 @@ if st.button("Run Growth Agent"):
 
         with st.spinner("Agent is analyzing your business..."):
 
-            result = run_growth_agent(
-                business,
-                industry,
-                goal
-            )
+            try:
+                result = run_growth_agent(
+                    business,
+                    industry,
+                    goal
+                )
 
-        st.subheader("🧠 GrowthPilot Agent Report")
-        st.write(result)
+                st.subheader("🧠 GrowthPilot Agent Report")
+                st.write(result)
 
+            except Exception as e:
+                st.error("Growth Agent error")
+                st.write(str(e))
 
 st.divider()
-
-
 
 # ==============================
 # CUSTOMER OPPORTUNITY ANALYSIS
 # ==============================
 
 st.subheader("🎯 Customer Opportunity Analysis")
+
 # ==============================
 # AI CUSTOMER INSIGHTS
 # ==============================
@@ -166,14 +176,16 @@ st.subheader("🧠 AI Customer Insights")
 if st.button("🤖 Analyze Customers with AI"):
 
     if not api_key:
-        st.error("Gemini API key not found. Check your .env file.")
+        st.error("Gemini API key not found. Check your Streamlit Secrets.")
 
     else:
-        customers = pd.read_csv("data/customers.csv")
 
-        customer_data = customers.to_string(index=False)
+        try:
+            customers = pd.read_csv("data/customers.csv")
 
-        prompt = f"""
+            customer_data = customers.to_string(index=False)
+
+            prompt = f"""
 You are an AI business growth analyst.
 
 Analyze the following customer data:
@@ -191,45 +203,56 @@ Identify:
 Give practical business recommendations.
 """
 
-        with st.spinner("🤖 AI is analyzing customer data..."):
+            with st.spinner("🤖 AI is analyzing customer data..."):
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
-            )
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash-lite",
+                    contents=prompt
+                )
 
-        st.subheader("📊 AI Customer Analysis")
-        st.write(response.text)
+            st.subheader("📊 AI Customer Analysis")
+            st.write(response.text)
+
+        except Exception as e:
+            st.error("Customer analysis error")
+            st.write(str(e))
 
 st.divider()
+
+# ==============================
+# FIND BEST CUSTOMERS
+# ==============================
 
 if st.button("🔎 Find Best Customers"):
 
-    customers = pd.read_csv("data/customers.csv")
+    try:
+        customers = pd.read_csv("data/customers.csv")
 
-    customers["opportunity_score"] = (
-        customers["visits"] * 2
-        + customers["purchases"] * 5
-        + customers["total_spent"] / 1000
-    )
+        customers["opportunity_score"] = (
+            customers["visits"] * 2
+            + customers["purchases"] * 5
+            + customers["total_spent"] / 1000
+        )
 
-    customers = customers.sort_values(
-        "opportunity_score",
-        ascending=False
-    )
+        customers = customers.sort_values(
+            "opportunity_score",
+            ascending=False
+        )
 
-    st.dataframe(
-        customers,
-        use_container_width=True
-    )
+        st.dataframe(
+            customers,
+            use_container_width=True
+        )
 
-    st.success(
-        f"🎯 Best opportunity: {customers.iloc[0]['name']}"
-    )
+        st.success(
+            f"🎯 Best opportunity: {customers.iloc[0]['name']}"
+        )
 
+    except Exception as e:
+        st.error("Customer data error")
+        st.write(str(e))
 
 st.divider()
-
 
 # ==============================
 # PERSONALIZED AI MESSAGE
@@ -247,7 +270,7 @@ if st.button("✨ Generate Personalized Message"):
 
     elif not api_key:
 
-        st.error("Gemini API key not found. Check your .env file.")
+        st.error("Gemini API key not found. Check your Streamlit Secrets.")
 
     else:
 
@@ -269,15 +292,20 @@ The message should:
 
         with st.spinner("🤖 Creating personalized message..."):
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
-            )
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash-lite",
+                    contents=prompt
+                )
 
-        st.success("Message generated!")
+                st.success("Message generated!")
+                st.write(response.text)
 
-        st.write(response.text)
-        # ==============================
+            except Exception as e:
+                st.error("Gemini API error")
+                st.write(str(e))
+
+# ==============================
 # 7-DAY AI GROWTH PLAN
 # ==============================
 
@@ -288,9 +316,11 @@ st.subheader("📅 7-Day AI Growth Plan")
 if st.button("🚀 Create 7-Day Plan"):
 
     if not business:
+
         st.warning("Enter your business name first.")
 
     elif not api_key:
+
         st.error("Gemini API key not found.")
 
     else:
@@ -311,7 +341,35 @@ Day 1:
 - Reason
 - Expected result
 
-Continue through Day 7.
+Day 2:
+- Action
+- Reason
+- Expected result
+
+Day 3:
+- Action
+- Reason
+- Expected result
+
+Day 4:
+- Action
+- Reason
+- Expected result
+
+Day 5:
+- Action
+- Reason
+- Expected result
+
+Day 6:
+- Action
+- Reason
+- Expected result
+
+Day 7:
+- Action
+- Reason
+- Expected result
 
 Make the plan realistic for a small business
 and focus on measurable growth.
@@ -320,23 +378,14 @@ and focus on measurable growth.
         with st.spinner("🤖 Creating your 7-day growth plan..."):
 
             try:
-   try:
-    response = client.models.generate_content(
-        model="gemini-2.5-flash-lite",
-        contents=prompt
-    )
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash-lite",
+                    contents=prompt
+                )
 
-    st.subheader("📈 AI Growth Strategy")
-    st.write(response.text)
+                st.subheader("📅 Your 7-Day Growth Plan")
+                st.write(response.text)
 
-except Exception as e:
-    st.error("Gemini API error")
-    st.write(str(e))
-
-    except Exception as e:
-    st.error("Gemini API request failed.")
-    st.code(str(e))
-    st.stop()
-
-    st.subheader("📈 Your 7-Day Growth Plan")
-    st.write(response.text)
+            except Exception as e:
+                st.error("Gemini API error")
+                st.write(str(e))
